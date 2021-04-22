@@ -1,29 +1,28 @@
 <template>
-<div class="admin">
-  <h1>The Admin Page!</h1>
+<div class="AddEdit">
+  <h1>Add photography to the gallery</h1>
     <div class="heading">
-      <div class="circle">1</div>
-      <h2>Add an Item</h2>
+      <h2>Add Photography</h2>
     </div>
     <div class="add">
       <div class="form">
         <input v-model="title" placeholder="Title">
         <p></p>
         <input type="file" name="photo" @change="fileChanged">
-        <br/><br/>
-        <textarea v-model="description" placeholder="Description of Item"></textarea>
-        <br/><br/>
+        <p><textarea v-model="description" placeholder="Describe the picture"></textarea></p>
+        <p><textarea v-model="place" placeholder="Where did you capture the moment?"></textarea></p>
         <button @click="upload">Upload</button>
       </div>
       <div class="upload" v-if="addItem">
         <h2>{{addItem.title}}</h2>
         <img :src="addItem.path" />
+        <p>{{addItem.description}}</p>
+        <p>-{{addItem.place}}-</p>
       </div>
     </div>
     <!-- add delete -->
         <div class="heading">
-      <div class="circle">2</div>
-      <h2>Edit/Delete an Item</h2>
+      <h2>Edit/Delete a photography</h2>
     </div>
     <div class="edit">
       <div class="form">
@@ -35,8 +34,8 @@
       </div>
       <div class="upload" v-if="findItem">
         <input v-model="findItem.title">
-        <textarea v-model="findItem.description"></textarea>
-        <p></p>
+        <p><textarea v-model="findItem.description" placeholder="Describe this picture..."></textarea></p>
+        <p><textarea v-model="findItem.place" placeholder="Where did you capture the moment?"></textarea></p>
         <img :src="findItem.path" />
       </div>
       <div class="actions" v-if="findItem">
@@ -48,94 +47,97 @@
 </template>
 
 <script>
-import axios from 'axios';
-
+import axios from "axios";
 export default {
-    data() {
+  name: "AddEdit",
+  data() {
     return {
       title: "",
       file: null,
-      itemDesc: '',
       addItem: null,
       items: [],
       findTitle: "",
       findItem: null,
-
-    }
+      description: "",
+      place: ""
+    };
   },
-    computed: {
-    suggestions() {
-      let items = this.items.filter(item => item.title.toLowerCase().startsWith(this.findTitle.toLowerCase()));
-      return items.sort((a, b) => a.title > b.title);
-    }
-  },
-  name: 'Admin',
-
-    created() {
+  created() {
     this.getItems();
   },
-
-    methods: {
-    fileChanged(event) {
-      this.file = event.target.files[0]
+  computed: {
+    suggestions() {
+      let items = this.items.filter((item) => item.title.toLowerCase().startsWith(this.findTitle.toLowerCase()));
+      return items.sort((a, b) => a.title > b.title);
     },
-      async upload() {
+  },
+  methods: {
+    fileChanged(event) {
+      this.file = event.target.files[0];
+    },
+    async upload() {
       try {
         const formData = new FormData();
-        formData.append('photo', this.file, this.file.name)
-        let r1 = await axios.post('/api/photos', formData);
-        let r2 = await axios.post('/api/items', {
+        formData.append("photo", this.file, this.file.name);
+        let r1 = await axios.post("/api/photos", formData);
+        let r2 = await axios.post("/api/items", {
           title: this.title,
+          description: this.description,
+          place: this.place,
           path: r1.data.path,
-          description: this.itemDesc,
         });
+        console.log(r2);
         this.addItem = r2.data;
-        console.log(r2.data);
-        console.log(this.addItem);
+        this.getItems();
       } catch (error) {
-        console.log(error);
+        (error) => {error;}
       }
     },
     async getItems() {
-  try {
-    let response = await axios.get("/api/items");
-    this.items = response.data;
-    return true;
-  } catch (error) {
-    console.log(error);
-  }
-},
+      try {
+        let response = await axios.get("/api/items");
+        this.items = response.data;
+        return true;
+      } catch (error) {
+        (error) => {error;}  
+      }
+    },
     selectItem(item) {
       this.findTitle = "";
       this.findItem = item;
     },
-        async deleteItem(item) {
+    async deleteItem(item) {
       try {
         await axios.delete("/api/items/" + item._id);
         this.findItem = null;
+        let index = this.items.indexOf(item);
+        this.items.splice(index, index + 1);
         this.getItems();
         return true;
       } catch (error) {
-        console.log(error);
+        (error) => {error;}
       }
     },
-        async editItem(item) {
+    async editItem(item) {
       try {
         await axios.put("/api/items/" + item._id, {
-          title: this.findItem.title, description: this.findItem.description,
+          title: this.findItem.title,
+          description: this.findItem.description,
+          place: this.findItem.place
         });
         this.findItem = null;
         this.getItems();
         return true;
       } catch (error) {
-        console.log(error);
+        (error) => {error;}
       }
     },
-  }
-}
+  },
+};
 </script>
 
 <style scoped>
+
 .image h2 {
   font-style: italic;
   font-size: 1em;
@@ -155,16 +157,6 @@ export default {
 .add,
 .edit {
   display: flex;
-}
-
-.circle {
-  border-radius: 50%;
-  width: 18px;
-  height: 18px;
-  padding: 8px;
-  background: #333;
-  color: #fff;
-  text-align: center
 }
 
 /* Form */
@@ -203,4 +195,9 @@ button {
   background-color: #5BDEFF;
   color: #fff;
 }
+
+button {
+  background-color: #008CBA;
+}
+
 </style>

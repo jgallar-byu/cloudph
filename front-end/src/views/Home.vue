@@ -2,16 +2,19 @@
 <div class="home">
   <section class="image-gallery">
     <div class="image" v-for="item in items" :key="item.id">
+      <div class="border">
       <h2>{{item.title}}</h2>
-      <p>{{item.description}}</p>
       <img :src="item.path" />
+      <p>{{item.description}}</p>
+      <p>-{{item.place}}-</p>
+      </div>
     </div>
   </section>
 </div>
 </template>
 
 <script>
-// @ is an alias to /src
+
 import axios from 'axios';
 
 export default {
@@ -39,11 +42,17 @@ export default {
 </script>
 
 <style scoped>
+.image .border {
+  border: 3px solid #741212;
+  max-width: 1000%;
+  margin: auto;
+  padding: 10px;
+}
 .image h2 {
   font-style: italic;
 }
 
-/* Masonry */
+
 *,
 *:before,
 *:after {
@@ -64,21 +73,21 @@ export default {
   width: 100%;
 }
 
-/* Masonry on large screens */
+
 @media only screen and (min-width: 1024px) {
   .image-gallery {
     column-count: 4;
   }
 }
 
-/* Masonry on medium-sized screens */
+
 @media only screen and (max-width: 1023px) and (min-width: 768px) {
   .image-gallery {
     column-count: 3;
   }
 }
 
-/* Masonry on small screens */
+
 @media only screen and (max-width: 767px) and (min-width: 540px) {
   .image-gallery {
     column-count: 2;
